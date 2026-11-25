@@ -6,59 +6,13 @@
   <title>Trench — Long trench coats in New York</title>
   <meta name="description" content="Three long trench coats, made for New York weather. Free delivery in Manhattan, Brooklyn and Queens.">
   <meta name="theme-color" content="#ffffff">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230071e3'/%3E%3Cpath d='M22 12h20l6 14-5 30H21l-5-30z' fill='%23fff'/%3E%3C/svg%3E">
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
   <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
 </head>
-<body>
+<body data-page="home">
 
-  <!-- One coat drawing, reused with a different colour for each model -->
-  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
-    <defs>
-      <symbol id="coat" viewBox="0 0 200 300">
-        <!-- sleeves -->
-        <path d="M44 66 L16 226 L42 232 L66 112 Z" fill="var(--coat-dark)"/>
-        <path d="M156 66 L184 226 L158 232 L134 112 Z" fill="var(--coat-dark)"/>
-        <!-- body -->
-        <path d="M62 36 L100 26 L138 36 L158 68 L172 286 L28 286 L42 68 Z" fill="var(--coat)"/>
-        <!-- centre placket -->
-        <path d="M100 118 L100 286" stroke="var(--coat-dark)" stroke-width="2" opacity=".55"/>
-        <!-- collar and lapels -->
-        <path d="M70 34 L100 124 L82 130 L52 54 Z" fill="var(--coat-dark)"/>
-        <path d="M130 34 L100 124 L118 130 L148 54 Z" fill="var(--coat-dark)"/>
-        <!-- shoulder straps -->
-        <rect x="52" y="48" width="26" height="9" rx="2" transform="rotate(-24 65 52)" fill="var(--coat-dark)"/>
-        <rect x="122" y="48" width="26" height="9" rx="2" transform="rotate(24 135 52)" fill="var(--coat-dark)"/>
-        <!-- belt -->
-        <rect x="36" y="150" width="128" height="15" rx="3" fill="var(--coat-dark)"/>
-        <rect x="92" y="147" width="16" height="21" rx="3" fill="none" stroke="var(--coat-light)" stroke-width="3"/>
-        <!-- buttons -->
-        <g fill="var(--coat-light)">
-          <circle cx="84" cy="188" r="4.5"/><circle cx="116" cy="188" r="4.5"/>
-          <circle cx="84" cy="218" r="4.5"/><circle cx="116" cy="218" r="4.5"/>
-          <circle cx="84" cy="248" r="4.5"/><circle cx="116" cy="248" r="4.5"/>
-        </g>
-        <!-- pockets -->
-        <path d="M50 196 L70 200 M150 196 L130 200" stroke="var(--coat-dark)" stroke-width="3" stroke-linecap="round"/>
-      </symbol>
-    </defs>
-  </svg>
-
-  <header class="nav">
-    <div class="nav-inner">
-      <a class="brand" href="#top" aria-label="Trench, home">
-        <span class="brand-icon" aria-hidden="true">
-          <svg viewBox="0 0 200 300" style="--coat:#fff;--coat-dark:#cfe3fb;--coat-light:#0071e3"><use href="#coat"/></svg>
-        </span>
-        Trench
-      </a>
-      <nav class="nav-links" aria-label="Main">
-        <a href="#coats">Coats</a>
-        <a href="#details">Details</a>
-        <a href="#delivery">Delivery</a>
-      </nav>
-      <a class="btn btn-sm" href="#coats">Shop</a>
-    </div>
-  </header>
+  <header id="site-header" class="nav"></header>
 
   <main id="top">
 
@@ -73,9 +27,9 @@
             <a class="link" href="#delivery">See delivery</a>
           </div>
         </div>
-        <div class="hero-art" aria-hidden="true">
-          <div class="tile tile-stone hero-tile">
-            <svg viewBox="0 0 200 300" class="coat coat-stone"><use href="#coat"/></svg>
+        <div class="hero-art">
+          <div class="hero-tile">
+            <img src="assets/products/hudson-front.svg" alt="Hudson trench coat in stone, hanging" width="600" height="800">
           </div>
         </div>
       </div>
@@ -86,55 +40,7 @@
         <h2 id="coats-title">Three coats</h2>
         <p>Pick a cut. Every coat comes in sizes XS to XL.</p>
       </div>
-
-      <div class="cards">
-
-        <article class="card">
-          <div class="tile tile-stone" aria-hidden="true">
-            <svg viewBox="0 0 200 300" class="coat coat-stone"><use href="#coat"/></svg>
-          </div>
-          <div class="card-body">
-            <h3>Hudson</h3>
-            <p class="card-sub">The classic double-breasted trench</p>
-            <p class="card-text">Stone cotton gabardine with a belt, shoulder straps and a storm flap. Length 115 cm.</p>
-            <div class="card-foot">
-              <a class="btn btn-price" href="mailto:hello@trench.example?subject=Order%3A%20Hudson%20trench&amp;body=Size%3A%20%0AAddress%20in%20New%20York%3A%20" aria-label="Order Hudson for $390">$390</a>
-              <span class="muted">Free delivery</span>
-            </div>
-          </div>
-        </article>
-
-        <article class="card">
-          <div class="tile tile-black" aria-hidden="true">
-            <svg viewBox="0 0 200 300" class="coat coat-black"><use href="#coat"/></svg>
-          </div>
-          <div class="card-body">
-            <h3>Chelsea</h3>
-            <p class="card-sub">The longest cut, in black</p>
-            <p class="card-text">A wool-blend trench that falls below the knee and keeps its shape all day. Length 120 cm.</p>
-            <div class="card-foot">
-              <a class="btn btn-price" href="mailto:hello@trench.example?subject=Order%3A%20Chelsea%20trench&amp;body=Size%3A%20%0AAddress%20in%20New%20York%3A%20" aria-label="Order Chelsea for $460">$460</a>
-              <span class="muted">Free delivery</span>
-            </div>
-          </div>
-        </article>
-
-        <article class="card">
-          <div class="tile tile-olive" aria-hidden="true">
-            <svg viewBox="0 0 200 300" class="coat coat-olive"><use href="#coat"/></svg>
-          </div>
-          <div class="card-body">
-            <h3>Soho</h3>
-            <p class="card-sub">The rain coat in olive</p>
-            <p class="card-text">Water-repellent cotton twill with a deep collar, made for wet days. Length 118 cm.</p>
-            <div class="card-foot">
-              <a class="btn btn-price" href="mailto:hello@trench.example?subject=Order%3A%20Soho%20trench&amp;body=Size%3A%20%0AAddress%20in%20New%20York%3A%20" aria-label="Order Soho for $420">$420</a>
-              <span class="muted">Free delivery</span>
-            </div>
-          </div>
-        </article>
-
-      </div>
+      <div class="cards" id="cards"></div>
     </section>
 
     <section class="section" id="details" aria-labelledby="details-title">
@@ -155,16 +61,13 @@
       <div class="band">
         <h2 id="delivery-title">Delivered in New York</h2>
         <p>Free delivery in Manhattan, Brooklyn and Queens. Try your coat at home and return it within 14 days if it doesn't fit.</p>
-        <a class="btn" href="mailto:hello@trench.example?subject=Trench%20order">Email your order</a>
+        <a class="btn" href="#coats">Shop coats</a>
       </div>
     </section>
 
   </main>
 
-  <footer class="footer">
-    <p>Trench, New York.</p>
-    <p><a href="mailto:hello@trench.example">hello@trench.example</a></p>
-  </footer>
+  <footer id="site-footer" class="footer"></footer>
 
 </body>
 </html>

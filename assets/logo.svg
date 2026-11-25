@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 40" role="img" aria-label="Trench">
+  <g transform="translate(6 4)" fill="none" stroke="#1d1d1f" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M7 3 L12 1.5 L17 3 L21 9 L23.5 31 L0.5 31 L3 9 Z"/>
+    <path d="M8.5 2.6 L12 18 L15.5 2.6"/>
+    <path d="M2.2 19.5 L21.8 19.5"/>
+  </g>
+  <text x="40" y="27" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="23" font-weight="600" letter-spacing="-0.4" fill="#1d1d1f">Trench</text>
+</svg>
