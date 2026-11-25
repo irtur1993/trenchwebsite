@@ -212,6 +212,51 @@
     }).join('');
   }
 
+  /* ---------- "Added to bag" notice ---------- */
+
+  var toastTimer = null;
+
+  function hideToast() {
+    window.clearTimeout(toastTimer);
+    var region = $('#toast-region');
+    if (region) { region.innerHTML = ''; }
+  }
+
+  function startToastTimer() {
+    window.clearTimeout(toastTimer);
+    toastTimer = window.setTimeout(hideToast, 7000);
+  }
+
+  function showToast(p, size) {
+    var region = $('#toast-region');
+    if (!region) {
+      region = document.createElement('div');
+      region.id = 'toast-region';
+      region.className = 'toast-region';
+      region.setAttribute('role', 'status');
+      region.setAttribute('aria-live', 'polite');
+      document.body.appendChild(region);
+      document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { hideToast(); } });
+    }
+    var count = bagCount();
+    var t = totals('standard');
+    region.innerHTML =
+      '<div class="toast">' +
+      '<span class="toast-img" style="background:' + p.tile + '"><img src="' + img(p.id, 'front') + '" alt="" width="600" height="800"></span>' +
+      '<div class="toast-text"><strong>Added to bag</strong>' +
+      '<span>' + esc(p.name) + ', size ' + esc(size) + '</span>' +
+      '<span class="muted">' + count + (count === 1 ? ' item' : ' items') + ' in your bag, ' + money(t.subtotal) + '</span></div>' +
+      '<a class="btn btn-sm" href="cart.html">View bag</a>' +
+      '<button type="button" class="toast-close" aria-label="Close">&times;</button></div>';
+    var box = $('.toast', region);
+    $('.toast-close', region).addEventListener('click', hideToast);
+    box.addEventListener('mouseenter', function () { window.clearTimeout(toastTimer); });
+    box.addEventListener('mouseleave', startToastTimer);
+    box.addEventListener('focusin', function () { window.clearTimeout(toastTimer); });
+    box.addEventListener('focusout', startToastTimer);
+    startToastTimer();
+  }
+
   /* ---------- product page ---------- */
 
   function initProduct() {
@@ -245,7 +290,6 @@
       }).join('') + '</div></fieldset>' +
       '<p class="field-error" id="size-error" role="alert" hidden>Select a size.</p>' +
       '<button type="button" class="btn btn-block" id="add-btn">Add to bag</button>' +
-      '<p class="pdp-status" id="pdp-status" role="status"></p>' +
       '<ul class="pdp-points"><li>Free delivery in Manhattan, Brooklyn and Queens</li><li>Return within 14 days</li></ul>' +
       '<dl class="facts compact">' +
       '<div><dt>Colour</dt><dd>' + esc(p.color) + '</dd></div>' +
@@ -265,7 +309,6 @@
     });
 
     var err = $('#size-error');
-    var status = $('#pdp-status');
     $$('input[name="size"]', root).forEach(function (r) {
       r.addEventListener('change', function () { err.hidden = true; });
     });
@@ -278,7 +321,7 @@
         return;
       }
       addToBag(p.id, chosen.value);
-      status.innerHTML = 'Added ' + esc(p.name) + ', size ' + esc(chosen.value) + ', to your bag. <a href="cart.html">View bag</a>';
+      showToast(p, chosen.value);
     });
   }
 
