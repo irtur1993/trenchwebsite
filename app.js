@@ -310,11 +310,11 @@
     }
     document.title = p.name + ' — Trench';
 
-    var views = [['front', 'full length'], ['look', 'worn outdoors'], ['detail', 'close-up']];
+    var views = [['front', 'front'], ['look', 'second view'], ['detail', 'close-up']];
     root.innerHTML =
       '<div class="pdp">' +
       '<div class="gallery"><div class="gallery-main" style="background:' + p.tile + '">' +
-      '<img id="main-img" src="' + img(p.id, 'front') + '" alt="' + esc(p.name) + ' coat in ' + esc(p.color.toLowerCase()) + ', full length" width="900" height="1200"></div>' +
+      '<img id="main-img" src="' + img(p.id, 'front') + '" alt="' + esc(p.name) + ' coat in ' + esc(p.color.toLowerCase()) + ', front" width="900" height="1200"></div>' +
       '<div class="thumbs" role="group" aria-label="Product views">' +
       views.map(function (v, i) {
         return '<button type="button" class="thumb" style="background:' + p.tile + '" data-view="' + v[0] + '" data-alt="' + esc(p.name) + ' coat in ' + esc(p.color.toLowerCase()) + ', ' + v[1] + '" aria-pressed="' + (i === 0) + '" aria-label="Show ' + v[1] + '">' +
