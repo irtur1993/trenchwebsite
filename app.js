@@ -80,7 +80,7 @@
     return null;
   }
 
-  function img(id, view) { return 'assets/products/' + id + '-' + view + '.svg'; }
+  function img(id, view) { return 'assets/products/' + id + '-' + view + '.jpg'; }
 
   function addBusinessDays(date, n) {
     var d = new Date(date.getTime());
@@ -166,19 +166,31 @@
   function renderChrome() {
     var h = $('#site-header');
     if (h) {
+      var bar = document.createElement('div');
+      bar.className = 'announce';
+      bar.innerHTML = '<p>Free delivery in Manhattan, Brooklyn and Queens <span aria-hidden="true">·</span> Returns within 14 days</p>';
+      h.parentNode.insertBefore(bar, h);
       h.className = 'nav';
       h.innerHTML = '<div class="nav-inner">' +
-        '<a class="brand" href="index.html" aria-label="Trench, home">' + MARK + '<span>Trench</span></a>' +
         '<nav class="nav-links" aria-label="Main">' +
         '<a href="index.html#coats">Coats</a><a href="index.html#details">Details</a><a href="index.html#delivery">Delivery</a></nav>' +
-        '<a class="bag" href="cart.html" data-bag-link>' + BAG_ICON + '<span class="bag-count" data-bag-count hidden>0</span></a>' +
+        '<a class="brand" href="index.html" aria-label="Trench, home">' + MARK + '<span>Trench</span></a>' +
+        '<div class="nav-end"><a class="bag" href="cart.html" data-bag-link>' + BAG_ICON + '<span class="bag-label">Bag</span><span class="bag-count" data-bag-count hidden>0</span></a></div>' +
         '</div>';
     }
     var f = $('#site-footer');
     if (f) {
       f.className = 'footer';
-      f.innerHTML = '<p>Trench, New York.</p>' +
-        '<p>Demo store: no payment is taken and nothing is shipped.</p>';
+      f.innerHTML = '<div class="footer-inner">' +
+        '<div class="footer-cols">' +
+        '<div><h2>Shop</h2><ul>' + PRODUCTS.map(function (p) {
+          return '<li><a href="product.html?id=' + p.id + '">' + esc(p.name) + ', ' + esc(p.color) + '</a></li>';
+        }).join('') + '</ul></div>' +
+        '<div><h2>Help</h2><ul><li><a href="index.html#delivery">Delivery</a></li><li><a href="index.html#delivery">Returns within 14 days</a></li><li><a href="index.html#details">Fit and care</a></li></ul></div>' +
+        '<div><h2>Trench</h2><ul><li>New York</li><li><a href="cart.html">Your bag</a></li></ul></div>' +
+        '</div>' +
+        '<div class="footer-base"><p>&copy; ' + new Date().getFullYear() + ' Trench, New York.</p>' +
+        '<p>Demo store: no payment is taken and nothing is shipped. Photos from Unsplash.</p></div></div>';
     }
     updateBadge();
   }
@@ -203,58 +215,87 @@
       var href = 'product.html?id=' + p.id;
       return '<article class="card">' +
         '<a class="card-media" href="' + href + '" style="background:' + p.tile + '" aria-label="View ' + esc(p.name) + '">' +
-        '<img src="' + img(p.id, 'front') + '" alt="' + esc(p.name) + ' trench coat, front view" width="600" height="800" loading="lazy"></a>' +
-        '<div class="card-body"><h3><a href="' + href + '">' + esc(p.name) + '</a></h3>' +
+        '<img src="' + img(p.id, 'front') + '" alt="' + esc(p.name) + ' coat in ' + esc(p.color.toLowerCase()) + '" width="900" height="1200" loading="lazy">' +
+        '<img class="card-alt" src="' + img(p.id, 'look') + '" alt="" width="900" height="1200" loading="lazy">' +
+        '<span class="card-quick">View coat</span></a>' +
+        '<div class="card-body"><div class="card-row"><h3><a href="' + href + '">' + esc(p.name) + '</a></h3>' +
+        '<p class="card-price">' + price(p.price) + '</p></div>' +
         '<p class="card-sub">' + esc(p.sub) + '</p>' +
-        '<p class="card-text">' + esc(p.desc) + '</p>' +
-        '<div class="card-foot"><a class="btn btn-price" href="' + href + '" aria-label="View ' + esc(p.name) + ', ' + price(p.price) + '">' + price(p.price) + '</a>' +
-        '<span class="muted">Free delivery</span></div></div></article>';
+        '<p class="card-color"><span class="swatch swatch-' + p.id + '" aria-hidden="true"></span>' + esc(p.color) + ', ' + esc(p.length) + '</p>' +
+        '</div></article>';
     }).join('');
   }
 
-  /* ---------- "Added to bag" notice ---------- */
+  /* ---------- "Added to bag" panel ---------- */
 
-  var toastTimer = null;
+  var lastFocus = null;
 
-  function hideToast() {
-    window.clearTimeout(toastTimer);
-    var region = $('#toast-region');
-    if (region) { region.innerHTML = ''; }
+  function closeAdded() {
+    var root = $('#added-root');
+    if (!root || root.hidden) { return; }
+    root.classList.remove('is-open');
+    document.documentElement.classList.remove('no-scroll');
+    window.setTimeout(function () { root.hidden = true; root.innerHTML = ''; }, 250);
+    if (lastFocus && lastFocus.focus) { lastFocus.focus(); }
   }
 
-  function startToastTimer() {
-    window.clearTimeout(toastTimer);
-    toastTimer = window.setTimeout(hideToast, 7000);
-  }
-
-  function showToast(p, size) {
-    var region = $('#toast-region');
-    if (!region) {
-      region = document.createElement('div');
-      region.id = 'toast-region';
-      region.className = 'toast-region';
-      region.setAttribute('role', 'status');
-      region.setAttribute('aria-live', 'polite');
-      document.body.appendChild(region);
-      document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { hideToast(); } });
+  function showAdded(p, size) {
+    var root = $('#added-root');
+    if (!root) {
+      root = document.createElement('div');
+      root.id = 'added-root';
+      root.className = 'added-root';
+      root.hidden = true;
+      document.body.appendChild(root);
+      document.addEventListener('keydown', function (e) {
+        if (root.hidden) { return; }
+        if (e.key === 'Escape') { closeAdded(); }
+        if (e.key === 'Tab') {
+          var f = $$('a[href], button', root);
+          if (!f.length) { return; }
+          if (e.shiftKey && document.activeElement === f[0]) { e.preventDefault(); f[f.length - 1].focus(); }
+          else if (!e.shiftKey && document.activeElement === f[f.length - 1]) { e.preventDefault(); f[0].focus(); }
+        }
+      });
     }
+    lastFocus = document.activeElement;
     var count = bagCount();
     var t = totals('standard');
-    region.innerHTML =
-      '<div class="toast">' +
-      '<span class="toast-img" style="background:' + p.tile + '"><img src="' + img(p.id, 'front') + '" alt="" width="600" height="800"></span>' +
-      '<div class="toast-text"><strong>Added to bag</strong>' +
-      '<span>' + esc(p.name) + ', size ' + esc(size) + '</span>' +
-      '<span class="muted">' + count + (count === 1 ? ' item' : ' items') + ' in your bag, ' + money(t.subtotal) + '</span></div>' +
-      '<a class="btn btn-sm" href="cart.html">View bag</a>' +
-      '<button type="button" class="toast-close" aria-label="Close">&times;</button></div>';
-    var box = $('.toast', region);
-    $('.toast-close', region).addEventListener('click', hideToast);
-    box.addEventListener('mouseenter', function () { window.clearTimeout(toastTimer); });
-    box.addEventListener('mouseleave', startToastTimer);
-    box.addEventListener('focusin', function () { window.clearTimeout(toastTimer); });
-    box.addEventListener('focusout', startToastTimer);
-    startToastTimer();
+    var qty = getBag().filter(function (l) { return l.id === p.id && l.size === size; })[0];
+    root.innerHTML =
+      '<div class="added-overlay" data-close></div>' +
+      '<div class="added" role="dialog" aria-modal="true" aria-labelledby="added-title">' +
+      '<div class="added-head"><p id="added-title" class="added-title">' +
+      '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>' +
+      'Added to your bag</p>' +
+      '<button type="button" class="added-close" data-close aria-label="Close">' +
+      '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>' +
+      '<div class="added-item">' +
+      '<span class="added-img" style="background:' + p.tile + '"><img src="' + img(p.id, 'front') + '" alt="" width="900" height="1200"></span>' +
+      '<div class="added-info"><p class="added-name">' + esc(p.name) + '</p>' +
+      '<p class="muted">' + esc(p.sub) + '</p>' +
+      '<dl class="added-meta"><div><dt>Colour</dt><dd>' + esc(p.color) + '</dd></div>' +
+      '<div><dt>Size</dt><dd>' + esc(size) + '</dd></div>' +
+      '<div><dt>Quantity</dt><dd>' + (qty ? qty.qty : 1) + '</dd></div></dl>' +
+      '<p class="added-price">' + price(p.price) + '</p></div></div>' +
+      '<dl class="added-sum"><div><dt>Bag subtotal (' + count + (count === 1 ? ' item' : ' items') + ')</dt><dd>' + money(t.subtotal) + '</dd></div>' +
+      '<div><dt>Delivery</dt><dd>Free</dd></div></dl>' +
+      '<div class="added-actions"><a class="btn btn-block" href="checkout.html">Check out</a>' +
+      '<a class="btn btn-block btn-light" href="cart.html">View bag</a>' +
+      '<button type="button" class="text-btn added-continue" data-close>Continue shopping</button></div>' +
+      '<p class="added-note muted">Free delivery in Manhattan, Brooklyn and Queens. Returns within 14 days.</p>' +
+      '</div>';
+    $$('[data-close]', root).forEach(function (el) { el.addEventListener('click', closeAdded); });
+    root.hidden = false;
+    document.documentElement.classList.add('no-scroll');
+    $$('[data-bag-count]').forEach(function (el) {
+      el.classList.toggle('bump', false);
+      void el.offsetWidth;
+      el.classList.toggle('bump', true);
+    });
+    void root.offsetWidth;
+    root.classList.add('is-open');
+    $('.added-close', root).focus();
   }
 
   /* ---------- product page ---------- */
@@ -269,21 +310,22 @@
     }
     document.title = p.name + ' — Trench';
 
-    var views = [['front', 'front view'], ['back', 'back view'], ['detail', 'close-up of buttons and belt']];
+    var views = [['front', 'full length'], ['look', 'worn outdoors'], ['detail', 'close-up']];
     root.innerHTML =
       '<div class="pdp">' +
       '<div class="gallery"><div class="gallery-main" style="background:' + p.tile + '">' +
-      '<img id="main-img" src="' + img(p.id, 'front') + '" alt="' + esc(p.name) + ' trench coat, front view" width="600" height="800"></div>' +
+      '<img id="main-img" src="' + img(p.id, 'front') + '" alt="' + esc(p.name) + ' coat in ' + esc(p.color.toLowerCase()) + ', full length" width="900" height="1200"></div>' +
       '<div class="thumbs" role="group" aria-label="Product views">' +
       views.map(function (v, i) {
-        return '<button type="button" class="thumb" style="background:' + p.tile + '" data-view="' + v[0] + '" data-alt="' + esc(p.name) + ' trench coat, ' + v[1] + '" aria-pressed="' + (i === 0) + '" aria-label="Show ' + v[1] + '">' +
-          '<img src="' + img(p.id, v[0]) + '" alt="" width="600" height="800"></button>';
+        return '<button type="button" class="thumb" style="background:' + p.tile + '" data-view="' + v[0] + '" data-alt="' + esc(p.name) + ' coat in ' + esc(p.color.toLowerCase()) + ', ' + v[1] + '" aria-pressed="' + (i === 0) + '" aria-label="Show ' + v[1] + '">' +
+          '<img src="' + img(p.id, v[0]) + '" alt="" width="900" height="1200"></button>';
       }).join('') + '</div></div>' +
       '<div class="pdp-info">' +
+      '<nav class="crumbs" aria-label="Breadcrumb"><a href="index.html">Home</a><span aria-hidden="true">/</span><a href="index.html#coats">Coats</a><span aria-hidden="true">/</span><span aria-current="page">' + esc(p.name) + '</span></nav>' +
       '<h1>' + esc(p.name) + '</h1>' +
       '<p class="pdp-sub">' + esc(p.sub) + '</p>' +
       '<p class="pdp-price">' + price(p.price) + '</p>' +
-      '<p class="pdp-desc">' + esc(p.desc) + '</p>' +
+      '<p class="pdp-color">Colour: <strong>' + esc(p.color) + '</strong></p>' +
       '<fieldset class="sizes"><legend>Size</legend><div class="size-row">' +
       SIZES.map(function (s) {
         return '<input type="radio" name="size" id="size-' + s + '" value="' + s + '"><label for="size-' + s + '">' + s + '</label>';
@@ -291,13 +333,27 @@
       '<p class="field-error" id="size-error" role="alert" hidden>Select a size.</p>' +
       '<button type="button" class="btn btn-block" id="add-btn">Add to bag</button>' +
       '<ul class="pdp-points"><li>Free delivery in Manhattan, Brooklyn and Queens</li><li>Return within 14 days</li></ul>' +
-      '<dl class="facts compact">' +
+      '<details class="acc" open><summary>Description</summary><p>' + esc(p.desc) + '</p></details>' +
+      '<details class="acc"><summary>Details and care</summary><dl class="facts compact">' +
       '<div><dt>Colour</dt><dd>' + esc(p.color) + '</dd></div>' +
       '<div><dt>Length</dt><dd>' + esc(p.length) + '</dd></div>' +
       '<div><dt>Fabric</dt><dd>' + esc(p.fabric) + '</dd></div>' +
       '<div><dt>Fit</dt><dd>Relaxed, with room for a sweater</dd></div>' +
-      '<div><dt>Care</dt><dd>' + esc(p.care) + '</dd></div></dl>' +
+      '<div><dt>Care</dt><dd>' + esc(p.care) + '</dd></div></dl></details>' +
+      '<details class="acc"><summary>Delivery and returns</summary><p>' + esc(SHIPPING.standard.label) + ': ' + esc(SHIPPING.standard.note.toLowerCase()) + '. ' +
+      esc(SHIPPING.sameday.label) + ': ' + esc(SHIPPING.sameday.note) + '. Try your coat at home and return it within 14 days if it doesn\'t fit.</p></details>' +
       '</div></div>';
+
+    var others = PRODUCTS.filter(function (o) { return o.id !== p.id; });
+    root.insertAdjacentHTML('beforeend', '<section class="more" aria-labelledby="more-title"><h2 id="more-title">You may also like</h2><div class="cards cards-2">' +
+      others.map(function (o) {
+        var href = 'product.html?id=' + o.id;
+        return '<article class="card"><a class="card-media" href="' + href + '" style="background:' + o.tile + '" aria-label="View ' + esc(o.name) + '">' +
+          '<img src="' + img(o.id, 'front') + '" alt="' + esc(o.name) + ' coat in ' + esc(o.color.toLowerCase()) + '" width="900" height="1200" loading="lazy">' +
+          '<img class="card-alt" src="' + img(o.id, 'look') + '" alt="" width="900" height="1200" loading="lazy"></a>' +
+          '<div class="card-body"><div class="card-row"><h3><a href="' + href + '">' + esc(o.name) + '</a></h3><p class="card-price">' + price(o.price) + '</p></div>' +
+          '<p class="card-sub">' + esc(o.sub) + '</p></div></article>';
+      }).join('') + '</div></section>');
 
     var main = $('#main-img');
     $$('.thumb', root).forEach(function (btn) {
@@ -321,7 +377,11 @@
         return;
       }
       addToBag(p.id, chosen.value);
-      showToast(p, chosen.value);
+      showAdded(p, chosen.value);
+      var btn = this;
+      btn.classList.add('is-added');
+      btn.textContent = 'Added to bag';
+      window.setTimeout(function () { btn.classList.remove('is-added'); btn.textContent = 'Add to bag'; }, 2500);
     });
   }
 
@@ -333,7 +393,7 @@
     function itemHtml(l) {
       var label = esc(l.p.name) + ', size ' + esc(l.size);
       return '<li class="cart-item" data-id="' + l.p.id + '" data-size="' + l.size + '">' +
-        '<a class="cart-img" href="product.html?id=' + l.p.id + '" style="background:' + l.p.tile + '"><img src="' + img(l.p.id, 'front') + '" alt="' + esc(l.p.name) + ' trench coat" width="600" height="800"></a>' +
+        '<a class="cart-img" href="product.html?id=' + l.p.id + '" style="background:' + l.p.tile + '"><img src="' + img(l.p.id, 'front') + '" alt="' + esc(l.p.name) + ' trench coat" width="900" height="1200"></a>' +
         '<div class="cart-info"><a class="cart-name" href="product.html?id=' + l.p.id + '">' + esc(l.p.name) + '</a>' +
         '<p class="muted">Size ' + esc(l.size) + ', ' + esc(l.p.color) + '</p>' +
         '<div class="qty"><button type="button" data-act="dec" aria-label="Decrease quantity of ' + label + '">&minus;</button>' +
@@ -470,7 +530,7 @@
 
     function renderSummary() {
       $('#mini').innerHTML = lines().map(function (l) {
-        return '<li><span class="mini-img" style="background:' + l.p.tile + '"><img src="' + img(l.p.id, 'front') + '" alt="" width="600" height="800"><span class="mini-qty">' + l.qty + '</span></span>' +
+        return '<li><span class="mini-img" style="background:' + l.p.tile + '"><img src="' + img(l.p.id, 'front') + '" alt="" width="900" height="1200"><span class="mini-qty">' + l.qty + '</span></span>' +
           '<span class="mini-name">' + esc(l.p.name) + '<span class="muted">Size ' + esc(l.size) + '</span></span><span>' + money(l.total) + '</span></li>';
       }).join('');
       $('#sum').innerHTML = summaryRows(totals(shipKey()));
@@ -629,7 +689,7 @@
       '<section class="block"><h2>Items</h2><ul class="mini-list">' +
       order.items.map(function (i) {
         var p = product(i.id);
-        return '<li><span class="mini-img" style="background:' + (p ? p.tile : '#eee') + '"><img src="' + img(i.id, 'front') + '" alt="" width="600" height="800"><span class="mini-qty">' + i.qty + '</span></span>' +
+        return '<li><span class="mini-img" style="background:' + (p ? p.tile : '#eee') + '"><img src="' + img(i.id, 'front') + '" alt="" width="900" height="1200"><span class="mini-qty">' + i.qty + '</span></span>' +
           '<span class="mini-name">' + esc(i.name) + '<span class="muted">Size ' + esc(i.size) + ', ' + esc(i.color) + '</span></span><span>' + money(i.total) + '</span></li>';
       }).join('') + '</ul>' + summaryRows(order.totals) + '</section>' +
       '<p class="center"><a class="btn" href="index.html#coats">Continue shopping</a></p>';
